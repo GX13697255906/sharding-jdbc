@@ -1,2 +1,48 @@
 server:
   port: 80
+spring:
+  application:
+    name: sharding-jdbc
+  shardingsphere:
+    mode:
+      type: Standalone
+      repository:
+        type: JDBC
+    datasource:
+      names: dms1,dms2
+      dms1:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        jdbc-url: jdbc:mysql://localhost:3306/dms?useSSL=false&useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+        username: root
+        password: dms@123
+      dms2:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        jdbc-url: jdbc:mysql://localhost:3306/dms_el_qy?useSSL=false&useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+        username: root
+        password: dms@123
+    rules:
+      sharding:
+        tables:
+          biz_new_unit_start_stop:
+            actualDataNodes: dms1.biz_new_unit_start_stop_${202209..202210}
+            databaseStrategy:
+              standard:
+                shardingColumn: scope_date
+                shardingAlgorithmName: t-order-inline
+        shardingAlgorithms:
+          database-inline:
+            type: INLINE
+            props:
+              algorithm-expression: dms1
+          t-order-inline:
+            type: INLINE
+            props:
+              algorithm-expression: biz_new_unit_start_stop_${order_id % 2}
+
+
+
+
+
+
